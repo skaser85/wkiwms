@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template('index.html', episodes=get_episodes())
 
 @app.route('/get-episodes')
 def get_episodes_():

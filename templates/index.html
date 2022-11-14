@@ -8,7 +8,106 @@
     <title>WKIWMS</title>
 </head>
 <body>
-    <div class="container" id="episodes-container"></div>
+    <div class="container" id="episodes-container">
+        {% for episode in episodes %}
+        <div class="card">
+            <header class="card-header">
+            <p class="card-header-title">
+                Episode <span id="episode-number">{{ episode.number }}</span>&nbsp;-&nbsp; <span id="date-recorded">{{ episode.record_date }}</span>
+            </p>
+            <button class="card-header-icon episode-details-btn" aria-label="more options">
+                <span class="icon">
+                <i class="fas fa-angle-down" aria-hidden="true"></i>
+                </span>
+            </button>
+            </header>
+            <div class="content episode-content is-hidden">
+                <p class="guests-title">Guests</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Number</th>
+                                <th>Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for guest in episode.guests %}
+                            <tr>
+                                <td>{{ guest.id }}</td>
+                                <td>{{ guest.name }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <p class="guests-title">Questions</p>
+                <div class="questions-container">
+                    {% for question in episode.questions %}
+                    <div class="card">
+                        <header class="card-header">
+                        <p class="card-header-title">
+                            Question <span id="question-number">{{ question.number }}</span>
+                        </p>
+                        <button class="card-header-icon episode-details-btn" aria-label="more options">
+                            <span class="icon">
+                            <i class="fas fa-angle-down" aria-hidden="true"></i>
+                            </span>
+                        </button>
+                        </header>
+                        <div class="content episode-content is-hidden">
+                            <p class="guests-title">Question</p>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Question</th>
+                                        <th>Category</th>
+                                        <th>Contributor</th>
+                                        <th>Location</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{{ question.question.question }}</td>
+                                        <td>{{ question.question.category }}</td>
+                                        <td>{{ question.question.contributor }}</td>
+                                        <td>{{ question.question.location }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p class="guests-title">Answers</p>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Answer</th>
+                                        <th>Type</th>
+                                        <th>Guest</th>
+                                        <th>Link</th>
+                                        <th>Fun Fact</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for answer in question.question.answers %}
+                                    <tr>
+                                        <td>{{ answer.id }}</td>
+                                        <td>{{ answer.answer }}</td>
+                                        <td>{{ answer.type }}</td>
+                                        <td>{{ answer.guest }}</td>
+                                        <td>{{ answer.link }}</td>
+                                        <td>{{ answer.fun_fact }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
     <script src="https://kit.fontawesome.com/5e450a7643.js" crossorigin="anonymous"></script>
     <script src="../static/index.js"></script>
 </body>
