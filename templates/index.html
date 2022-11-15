@@ -68,10 +68,10 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>{{ question.question.question }}</td>
-                                        <td>{{ question.question.category }}</td>
-                                        <td>{{ question.question.contributor }}</td>
-                                        <td>{{ question.question.location }}</td>
+                                        <td>{{ question.question }}</td>
+                                        <td>{{ question.category }}</td>
+                                        <td>{{ question.contributor }}</td>
+                                        <td>{{ question.location }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -88,7 +88,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for answer in question.question.answers %}
+                                    {% for answer in question.answers %}
                                     <tr>
                                         <td>{{ answer.id }}</td>
                                         <td>{{ answer.answer }}</td>
