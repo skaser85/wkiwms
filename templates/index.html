@@ -4,10 +4,34 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/index.css">
-    <title>WKIWMS</title>
+    <link rel="stylesheet" href="../static/css/index.css">
+    <title>WKIWMS - Episodes</title>
 </head>
 <body>
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+          <a class="navbar-item" href="https://www.instagram.com/p/CdaOEptPywa/">
+            <img src="../static/images/WKIWMS_logo.jpeg" width="28" height="28">
+          </a>
+      
+          <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+          </a>
+        </div>
+      
+        <div id="navbarBasicExample" class="navbar-menu">
+          <div class="navbar-start">
+            <a class="navbar-item" href="{{ url_for('index') }}">
+              Episodes
+            </a>
+      
+            <a class="navbar-item" href="{{ url_for('addEpisodeData') }}">
+              Add Episode
+            </a>
+        </div>
+    </nav>
     <div class="container" id="episodes-container">
         {% for episode in episodes %}
         <div class="card">
@@ -108,6 +132,6 @@
         {% endfor %}
     </div>
     <script src="https://kit.fontawesome.com/5e450a7643.js" crossorigin="anonymous"></script>
-    <script src="../static/index.js"></script>
+    <script src="../static/js/index.js"></script>
 </body>
 </html>
