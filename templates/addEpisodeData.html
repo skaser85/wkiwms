@@ -8,30 +8,25 @@
     <title>WKIWMS - Add Episode Data</title>
 </head>
 <body>
+    <!-- NAV -->
     <nav class="navbar" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
           <a class="navbar-item" href="https://www.instagram.com/p/CdaOEptPywa/" target="_blank" rel="noopener noreferrer">
             <img src="../static/images/WKIWMS_logo.jpeg" width="28" height="28">
           </a>
-      
           <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
             <span aria-hidden="true"></span>
             <span aria-hidden="true"></span>
             <span aria-hidden="true"></span>
           </a>
         </div>
-      
         <div id="navbarBasicExample" class="navbar-menu">
           <div class="navbar-start">
-            <a class="navbar-item" href="{{ url_for('index') }}">
-              Episodes
-            </a>
-      
-            <a class="navbar-item" href="{{ url_for('addEpisodeData') }}">
-              Add Episode
-            </a>
+            <a class="navbar-item" href="{{ url_for('index') }}">Episodes</a>
+            <a class="navbar-item" href="{{ url_for('addEpisodeData') }}">Add Episode</a>
         </div>
     </nav>
+    <!-- FORM -->
     <div class="container" id="episode-form-container">
 
     </div>
