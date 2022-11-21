@@ -11,7 +11,22 @@ from dbhandler import DBHandler
 
 DB_PATH = 'wkiwms.db'
 
-def get_episodes() -> List[Episode]:
+def get_next_episode() -> int:
+    """ Get the next available episode number. """
+    with DBHandler(DB_PATH) as db:
+        db_episode = db.fetch_one('SELECT * FROM episode ORDER BY number DESC LIMIT 1')
+        return int(db_episode[0]) + 1
+
+def get_guests() -> List[dict]:
+    """ Gets a list of the guests in the db. """
+    with DBHandler(DB_PATH) as db:
+        # get episodes
+        db_guests = db.fetch_all('SELECT * FROM guest')
+        guests = [Guest(g[0], g[1]) for g in db_guests]
+        return sorted([g.to_dict() for g in guests], key=lambda g: g['name'])
+
+
+def get_episodes() -> List[dict]:
     """ Gets the episodes from the db. """
     # episodes  = [
     #     {
@@ -116,6 +131,10 @@ class Guest:
     id: int
     name: str
 
+    def to_dict(self) -> dict:
+        """ Returns this Guest object as a dict """
+        return asdict(self)
+
 @dataclass
 class Episode:
     """ Episode """
@@ -129,4 +148,4 @@ class Episode:
         return asdict(self)
 
 if __name__ == '__main__':
-    pprint(get_episodes())
+    print(get_next_episode())

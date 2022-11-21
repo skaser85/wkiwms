@@ -28,7 +28,68 @@
     </nav>
     <!-- FORM -->
     <div class="container" id="episode-form-container">
-
+      <div class="container mb-4">
+        <div class="field">
+          <label class="label">Episode Number</label>
+          <div class="control">
+            <input class="input" type="text" placeholder="1" id="episode-number" disabled>
+          </div>
+          <button class="button mt-1" id="get-next-episode-number">Get Next Episode Number</button>
+        </div>
+        <div class="field">
+          <label class="label">Record Date</label>
+          <div class="control">
+            <input class="input" type="date" id="record-date">
+          </div>
+        </div>
+      </div>
+      <div class="container" id="guest-conatiner">
+        <div class="container" id="guest-row">
+          <div class="field">
+            <label class="label">Add a past guest</label>
+            <div class="control">
+              <span class="icon" id="submit-guest">
+                <i class="fas fa-check"></i>
+              </span>
+              <div class="select">
+                <select>
+                  <option></option>
+                  {% for guest in guests %}
+                  <option>{{ guest.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <label class="label">Add a new guest</label>
+            <div class="control is-flex">
+              <span class="icon" id="submit-guest">
+                <i class="fas fa-check"></i>
+              </span>
+              <input class="input" type="text" placeholder="Greg Greg">
+            </div>
+          </div>
+        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>ID</th>
+              <th>Name</th>
+            </tr>
+          </thead>
+          <tbody id="guests-body">
+            <tr>
+              <td>
+                <span class="icon" id="submit-guest">
+                  <i class="fas fa-trash"></i>
+                </span>
+              </td>
+              <td>10</td>
+              <td>Steve Kaser</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
     <script src="https://kit.fontawesome.com/5e450a7643.js" crossorigin="anonymous"></script>
     <script src="../static/js/addEpisodeData.js"></script>
