@@ -32,14 +32,14 @@
         <div class="field">
           <label class="label">Episode Number</label>
           <div class="control">
-            <input class="input" type="text" placeholder="1" id="episode-number" disabled>
+            <input class="input" type="text" placeholder="1" id="episode-number" value="3" disabled>
           </div>
           <button class="button mt-1" id="get-next-episode-number">Get Next Episode Number</button>
         </div>
         <div class="field">
           <label class="label">Record Date</label>
           <div class="control">
-            <input class="input" type="date" id="record-date">
+            <input class="input" type="date" id="record-date" value="2022-11-22">
           </div>
         </div>
       </div>
@@ -78,15 +78,17 @@
             </tr>
           </thead>
           <tbody id="guests-body">
+            <!-- {% for guest in guestData.guestsOnEpisode %}
             <tr>
               <td>
-                <span class="icon" id="delete-guest-row">
+                <span class="icon" data-guest="{{ guest.id }}">
                   <i class="fas fa-trash"></i>
                 </span>
               </td>
-              <td>10</td>
-              <td>Steve Kaser</td>
+              <td>{{ guest.id }}</td>
+              <td>{{ guest.name }}</td>
             </tr>
+            {% endfor %} -->
           </tbody>
         </table>
       </div>

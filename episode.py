@@ -23,12 +23,29 @@ def insert_guest(guest_name: str) -> dict:
         db_guest = db.insert('INSERT INTO guest (name) values (?)', (guest_name,))
         guest = db.fetch_one('SELECT * FROM guest WHERE id=?', (db_guest.lastrowid,))
         return (Guest(guest[0], guest[1]).to_dict())
+    
+def add_guest_to_episode(episode_id: int, guest_id: int):
+    """ Adds a guest to the episode """
+    with DBHandler(DB_PATH) as db:
+        db_ep_guest = db.insert('INSERT INTO episode_guest (episode_id, guest_id) values (?, ?)', (episode_id, guest_id))
+    
+def get_guests_for_episode(episode_id: int) -> List[dict]:
+    """ Gets the guests for the episode """
+    with DBHandler(DB_PATH) as db:
+        ep_guests = db.fetch_all('SELECT * FROM episode_guest WHERE episode_id=?', (episode_id,))
+        guests = []
+        for eg in ep_guests:
+            guest_db = db.fetch_one('SELECT * FROM guest WHERE id=?', (eg[1],))
+            guests.append(Guest(guest_db[0], guest_db[1]))
+        return [g.to_dict() for g in guests]
 
 def get_next_episode() -> int:
     """ Get the next available episode number. """
     with DBHandler(DB_PATH) as db:
         db_episode = db.fetch_one('SELECT * FROM episode ORDER BY number DESC LIMIT 1')
-        return int(db_episode[0]) + 1
+        ep_no = int(db_episode[0]) + 1
+        ep_insert = db.insert('INSERT INTO episode (number) values (?)', (ep_no,))
+        return ep_insert.lastrowid
 
 def get_guests() -> List[dict]:
     """ Gets a list of the guests in the db. """
@@ -37,7 +54,12 @@ def get_guests() -> List[dict]:
         db_guests = db.fetch_all('SELECT * FROM guest')
         guests = [Guest(g[0], g[1]) for g in db_guests]
         return sorted([g.to_dict() for g in guests], key=lambda g: g['name'])
-
+    
+def add_record_date(episode_id: int, date_str: str) -> str:
+    """ Adds the Record Date to the episode """
+    with DBHandler(DB_PATH) as db:
+        db_episode = db.update('UPDATE episode SET record_date=? WHERE number=?', (date_str, episode_id))
+        return date_str
 
 def get_episodes() -> List[dict]:
     """ Gets the episodes from the db. """
@@ -161,4 +183,4 @@ class Episode:
         return asdict(self)
 
 if __name__ == '__main__':
-    print(get_next_episode())
+    add_record_date(3, '20221122')
