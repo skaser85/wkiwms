@@ -11,6 +11,19 @@ from dbhandler import DBHandler
 
 DB_PATH = 'wkiwms.db'
 
+def get_guest(guest_name: str) -> dict:
+    """ Gets the guest data """
+    with DBHandler(DB_PATH) as db:
+        db_guest = db.fetch_one('SELECT * FROM guest WHERE name=?', (guest_name,))
+        return (Guest(db_guest[0], db_guest[1]).to_dict())
+
+def insert_guest(guest_name: str) -> dict:
+    """ Inserts a new guest """
+    with DBHandler(DB_PATH) as db:
+        db_guest = db.insert('INSERT INTO guest (name) values (?)', (guest_name,))
+        guest = db.fetch_one('SELECT * FROM guest WHERE id=?', (db_guest.lastrowid,))
+        return (Guest(guest[0], guest[1]).to_dict())
+
 def get_next_episode() -> int:
     """ Get the next available episode number. """
     with DBHandler(DB_PATH) as db:

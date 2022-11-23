@@ -48,11 +48,11 @@
           <div class="field">
             <label class="label">Add a past guest</label>
             <div class="control">
-              <span class="icon" id="submit-guest">
+              <span class="icon" id="submit-past-guest">
                 <i class="fas fa-check"></i>
               </span>
               <div class="select">
-                <select>
+                <select id="guest-select">
                   <option></option>
                   {% for guest in guests %}
                   <option>{{ guest.name }}</option>
@@ -62,10 +62,10 @@
             </div>
             <label class="label">Add a new guest</label>
             <div class="control is-flex">
-              <span class="icon" id="submit-guest">
+              <span class="icon" id="submit-new-guest">
                 <i class="fas fa-check"></i>
               </span>
-              <input class="input" type="text" placeholder="Greg Greg">
+              <input class="input" type="text" placeholder="Greg Greg" id="guest-input">
             </div>
           </div>
         </div>
@@ -80,7 +80,7 @@
           <tbody id="guests-body">
             <tr>
               <td>
-                <span class="icon" id="submit-guest">
+                <span class="icon" id="delete-guest-row">
                   <i class="fas fa-trash"></i>
                 </span>
               </td>
