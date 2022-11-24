@@ -1,4 +1,4 @@
-const SERVER_ADDR_BASE = `http://${window.location.hostname}:${window.location.port}`;
+const SERVER_ADDR_BASE = `https://${window.location.hostname}:${window.location.port}`;
 
 const docGetNextEpNo = document.querySelector("#get-next-episode-number");
 const docEpisodeNo = document.querySelector("#episode-number");
@@ -7,19 +7,26 @@ const docSubmitPastGuest = document.querySelector("#submit-past-guest");
 const docSubmitNewGuest = document.querySelector("#submit-new-guest");
 const docGuestSelect = document.querySelector("#guest-select");
 const docGuestInput = document.querySelector("#guest-input");
+const docGuestsBody = document.querySelector("#guests-body");
+
+const docDeleteGuests = document.querySelector("#delete-guests");
+
+docDeleteGuests.addEventListener("click", async e => {
+  const delGuests = fetch(`${SERVER_ADDR_BASE}/delete-guests-on-episode?episodeid=${docEpisodeNo.value}`);
+});
 
 docSubmitNewGuest.addEventListener("click", async e => {
     const guest = docGuestInput.value;
     const guestData = await insertGuest(guest);
     const guests = await addGuestToEpisode(guestData);
-    console.log(guests);
+    buildGuestRows(guests);
 });
 
 docSubmitPastGuest.addEventListener("click", async e => {
     const guest = docGuestSelect.options[docGuestSelect.selectedIndex].value;
     const guestData = await getGuest(guest);
     const guests = await addGuestToEpisode(guestData);
-    console.log(guests);
+    buildGuestRows(guests);
 });
 
 docGetNextEpNo.addEventListener("click", async e => {
@@ -63,7 +70,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const addGuestToEpisode = async (guestData) => {
-  await fetch(`${SERVER_ADDR_BASE}/add-guest-to-episode?guestid=${guestData.guest.id}&episodeid=${docEpisodeNo.value}`);
+  const guestsData = await fetch(`${SERVER_ADDR_BASE}/add-guest-to-episode?guestid=${guestData.guest.id}&episodeid=${docEpisodeNo.value}`);
+  return await guestsData.json();
+}
+
+const deleteGuestFromEpisode = async (guestID) => {
+  await fetch(`${SERVER_ADDR_BASE}/delete-guest-from-episode?guestid=?${guestID}&episodeid=${docEpisodeNo.value}`);
 }
 
 const insertGuest = async (guestName) => {
@@ -76,4 +88,29 @@ const getGuest = async (guestName) => {
   const guestDB = await fetch(`${SERVER_ADDR_BASE}/get-guest?guest=${guestName}`)
   const data = await guestDB.json();
   return data;
+}
+
+const buildGuestRows = (guests) => {
+  docGuestsBody.innerHTML = "";
+  for (let guest of guests.guestsOnEpisode) {
+    guestHTML = `
+      <td>
+        <span class="icon trash" data-guest="${guest.id}">
+          <i class="fas fa-trash"></i>
+        </span>
+      </td>
+      <td>${guest.id}</td>
+      <td>${guest.name}</td>
+    `;
+    let g = document.createElement('tr');
+    g.innerHTML = guestHTML;
+    let trash = g.querySelector(".trash");
+    trash.addEventListener("click", async e => {
+      let row = trash.parentElement.parentElement;
+      let guestID = row.children[1].innerText;
+      await deleteGuestFromEpisode(guestID);
+      row.remove();
+    });
+    docGuestsBody.appendChild(g);
+  }
 }

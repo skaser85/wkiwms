@@ -27,7 +27,7 @@ def insert_guest(guest_name: str) -> dict:
 def add_guest_to_episode(episode_id: int, guest_id: int):
     """ Adds a guest to the episode """
     with DBHandler(DB_PATH) as db:
-        db_ep_guest = db.insert('INSERT INTO episode_guest (episode_id, guest_id) values (?, ?)', (episode_id, guest_id))
+        db.insert('INSERT INTO episode_guest (episode_id, guest_id) values (?, ?)', (episode_id, guest_id))
     
 def get_guests_for_episode(episode_id: int) -> List[dict]:
     """ Gets the guests for the episode """
@@ -54,12 +54,26 @@ def get_guests() -> List[dict]:
         db_guests = db.fetch_all('SELECT * FROM guest')
         guests = [Guest(g[0], g[1]) for g in db_guests]
         return sorted([g.to_dict() for g in guests], key=lambda g: g['name'])
-    
+
+def delete_guests_on_episode(episode_id: int) -> None:
+    """ Deletes all guests from an episode"""
+    with DBHandler(DB_PATH) as db:
+        db.delete('DELETE FROM episode_guest WHERE episode_id=?', (episode_id,))
+
+def delete_guest_on_episode(episode_id: int, guest_id: int) -> None:
+    """ Deletes a single guest from an episode """
+    with DBHandler(DB_PATH) as db:
+        db.delete('DELETE FROM episode_guest WHERE (episode_id=? AND guest_id=?)', (episode_id,guest_id))
+        g = db.fetch_all('SELECT * FROM episode_guest WHERE episode_id=?', (episode_id,))
+        for guest in g:
+            print(guest)
+
 def add_record_date(episode_id: int, date_str: str) -> str:
     """ Adds the Record Date to the episode """
     with DBHandler(DB_PATH) as db:
-        db_episode = db.update('UPDATE episode SET record_date=? WHERE number=?', (date_str, episode_id))
+        db.update('UPDATE episode SET record_date=? WHERE number=?', (date_str, episode_id))
         return date_str
+
 
 def get_episodes() -> List[dict]:
     """ Gets the episodes from the db. """
@@ -101,7 +115,7 @@ def get_episodes() -> List[dict]:
         for episode in db_episodes:
             e = Episode(episode[0], episode[1])
             # get guests for episode
-            db_ep_guests = db.fetch_all('SELECT * FROM episode_guest WHERE episode=?', (episode[0],))
+            db_ep_guests = db.fetch_all('SELECT * FROM episode_guest WHERE episode_id=?', (episode[0],))
             guests = []
             for eg in db_ep_guests:
                 # get guest details
@@ -183,4 +197,5 @@ class Episode:
         return asdict(self)
 
 if __name__ == '__main__':
-    add_record_date(3, '20221122')
+    # add_record_date(3, '20221122')
+    pprint(get_episodes())
