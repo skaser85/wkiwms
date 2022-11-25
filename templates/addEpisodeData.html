@@ -29,6 +29,7 @@
     <!-- FORM -->
     <div class="container" id="episode-form-container">
       <div class="container mb-4">
+        <h1 class="title">General</h1>
         <div class="field">
           <label class="label">Episode Number</label>
           <div class="control">
@@ -44,6 +45,7 @@
         </div>
       </div>
       <div class="container" id="guest-conatiner">
+        <h1 class="title">Guests</h1>
         <div class="container" id="guest-row">
           <div class="field">
             <label class="label">Add a past guest</label>
@@ -54,7 +56,7 @@
               <div class="select">
                 <select id="guest-select">
                   <option></option>
-                  {% for guest in guests %}
+                  {% for guest in data.guests %}
                   <option>{{ guest.name }}</option>
                   {% endfor %}
                 </select>
@@ -68,8 +70,8 @@
               <input class="input" type="text" placeholder="Greg Greg" id="guest-input">
             </div>
           </div>
+          <button class="button is-danger" id="delete-guests">Delete All Guests On Episode</button>
         </div>
-        <button class="button" id="delete-guests">Delete All Guests On Episode</button>
         <table class="table">
           <thead>
             <tr>
@@ -79,9 +81,76 @@
             </tr>
           </thead>
           <tbody id="guests-body">
+            <tr>
+              <td>
+                <span class="icon trash" data-guest="2">
+                  <i class="fas fa-trash" aria-hidden="true"></i>
+                </span>
+              </td>
+              <td>2</td>
+              <td>Dave Warneke</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="icon trash" data-guest="8">
+                  <i class="fas fa-trash" aria-hidden="true"></i>
+                </span>
+              </td>
+              <td>8</td>
+              <td>Kirsty Webeck</td>
+            </tr>
           </tbody>
         </table>
       </div>
+      <div class="container" id="question-conatiner">
+        <h1 class="title">Questions</h1>
+        <div class="field">
+          <label class="label">Question</label>
+          <div class="control">
+            <input class="input" type="text" id="question-text">
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Category</label>
+        <div class="control">
+          <div class="select">
+            <select id="category-select">
+              <option></option>
+              {% for category in data.categories %}
+              <option data-id="{{ category.id }}">{{ category.category }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Contributor</label>
+        <div class="control">
+          <input class="input" type="text" id="contributor-name">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Location</label>
+        <div class="control">
+          <input class="input" type="text" id="location-text">
+        </div>
+      </div>
+      <button class="button is-primary" id="add-question">Add Question to Episdoe</button>
+      <button class="button is-danger" id="delete-all-questions">Delete All Questions for Episode</button>
+      <table class="table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>ID</th>
+            <th>Question</th>
+            <th>Category</th>
+            <th>Contributor</th>
+            <th>Location</th>
+          </tr>
+        </thead>
+        <tbody id="questions-body"></tbody>
+      </table>
     </div>
     <script src="https://kit.fontawesome.com/5e450a7643.js" crossorigin="anonymous"></script>
     <script src="../static/js/addEpisodeData.js"></script>

@@ -63,7 +63,7 @@ def delete_guests_on_episode(episode_id: int) -> None:
 def delete_guest_on_episode(episode_id: int, guest_id: int) -> None:
     """ Deletes a single guest from an episode """
     with DBHandler(DB_PATH) as db:
-        db.delete('DELETE FROM episode_guest WHERE (episode_id=? AND guest_id=?)', (episode_id,guest_id))
+        db.delete('DELETE FROM episode_guest WHERE episode_id=? AND guest_id=?', (episode_id,guest_id))
         g = db.fetch_all('SELECT * FROM episode_guest WHERE episode_id=?', (episode_id,))
         for guest in g:
             print(guest)
@@ -73,7 +73,54 @@ def add_record_date(episode_id: int, date_str: str) -> str:
     with DBHandler(DB_PATH) as db:
         db.update('UPDATE episode SET record_date=? WHERE number=?', (date_str, episode_id))
         return date_str
+    
+def get_question_categories() -> list[dict]:
+    """ Gets the question categories """
+    with DBHandler(DB_PATH) as db:
+        db_cats = db.fetch_all('SELECT * FROM question_category')
+        return [{'id': c[0], 'category': c[1]} for c in db_cats]
 
+def get_default_episode_data() -> dict:
+    """ Gets the data for the adddEpisodeData webpage """
+    return {
+        'guests': get_guests(),
+        'categories': get_question_categories()
+    }
+
+def create_question(question: str, category_id: int, contributor: str, location: str) -> tuple:
+    with DBHandler(DB_PATH) as db:
+        db_question = db.insert('INSERT INTO question (question, category_id, contributor_name, contributor_location) values (?, ?, ?, ?)', (question, category_id, contributor, location))
+        return db.fetch_one('SELECT * FROM question where id=?', (db_question.lastrowid,))
+        
+def add_question_to_episode(episode_id: int, question_id: int) -> None:
+    """ Adds a question to the episode """
+    with DBHandler(DB_PATH) as db:
+        db_ep_question = db.insert('INSERT INTO episode_question (episode_id, question_id) values (?, ?)', (episode_id, question_id))
+
+def get_questions_for_episode(episode_id: int) -> list[dict]:
+    """ Gets the questions for the episode """
+    with DBHandler(DB_PATH) as db:
+        db_questions = db.fetch_all('SELECT * FROM episode_question WHERE episode_id=?', (episode_id,))
+        questions = []
+        for question in db_questions:
+            q = db.fetch_one('SELECT * FROM question WHERE id=?', (question[1],))
+            category = get_question_category_from_id(q[3])
+            questions.append(Question(q[0], q[4], category, q[1], q[2]))
+        return [q.to_dict() for q in questions]
+    
+def get_question_category_from_id(category_id: int) -> str:
+    with DBHandler(DB_PATH) as db:
+        db_cat = db.fetch_one('SELECT * FROM question_category WHERE id=?', (category_id,))
+        category = db_cat[1]
+        return category
+    
+def delete_question_from_episode(episode_id: int, question_id: int) -> None:
+    with DBHandler(DB_PATH) as db:
+        db.delete('DELETE FROM episode_question WHERE episode_id=? AND question_id=?', (episode_id, question_id))
+
+def delete_questions_from_episode(episode_id: int) -> None:
+    with DBHandler(DB_PATH) as db:
+        db.delete('DELETE FROM episode_question WHERE episode_id=?', (episode_id,))
 
 def get_episodes() -> List[dict]:
     """ Gets the episodes from the db. """
@@ -129,9 +176,7 @@ def get_episodes() -> List[dict]:
                 # get question details
                 question = db.fetch_one('SELECT * FROM question WHERE id=?', (eq[1],))
                 # get question category
-                category_id = question[3]
-                db_cat = db.fetch_one('SELECT * FROM question_category WHERE id=?', (category_id,))
-                category = db_cat[1]
+                category = get_question_category_from_id(question[3])
                 # create Question object
                 q = Question(question[0], question[4], category, question[1], question[2])
                 # get answers
@@ -174,6 +219,10 @@ class Question:
     location: str
     answers: List[Answer] = field(default_factory=list)
 
+    def to_dict(self) -> dict:
+        """ Returns this Question object as a dict """
+        return asdict(self)
+
 @dataclass
 class Guest:
     """ Guest """
@@ -198,4 +247,8 @@ class Episode:
 
 if __name__ == '__main__':
     # add_record_date(3, '20221122')
-    pprint(get_episodes())
+    # pprint(get_episodes())
+    # delete_guest_on_episode(3, 2)
+    # pprint(get_question_categories())
+    add_question_to_episode(3, 8)
+    print(get_questions_for_episode(3))

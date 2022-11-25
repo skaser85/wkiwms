@@ -1,4 +1,4 @@
-const SERVER_ADDR_BASE = `https://${window.location.hostname}:${window.location.port}`;
+const SERVER_ADDR_BASE = `http://${window.location.hostname}:${window.location.port}`;
 
 const docGetNextEpNo = document.querySelector("#get-next-episode-number");
 const docEpisodeNo = document.querySelector("#episode-number");
@@ -9,10 +9,31 @@ const docGuestSelect = document.querySelector("#guest-select");
 const docGuestInput = document.querySelector("#guest-input");
 const docGuestsBody = document.querySelector("#guests-body");
 
+const docAddQuestion = document.querySelector("#add-question");
+const docQuestionText = document.querySelector("#question-text");
+const docQuestionCat = document.querySelector("#category-select");
+const docContributor = document.querySelector("#contributor-name");
+const docLocation = document.querySelector("#location-text");
+const docQuestionsBody = document.querySelector("#questions-body");
+
 const docDeleteGuests = document.querySelector("#delete-guests");
+const docDeleteQuestions = document.querySelector("#delete-all-questions");
 
 docDeleteGuests.addEventListener("click", async e => {
   const delGuests = fetch(`${SERVER_ADDR_BASE}/delete-guests-on-episode?episodeid=${docEpisodeNo.value}`);
+  const guests = await delGuests.json();
+  buildGuestRows(guests);
+});
+
+docDeleteQuestions.addEventListener("click", async e => {
+  const delQuestions = fetch(`${SERVER_ADDR_BASE}/delete-questions-from-episode?episodeid=${docEpisodeNo.value}`);
+  const questions = await delQuestions.json();
+  buildQuestionRows(questions.questions);
+});
+
+docAddQuestion.addEventListener("click", async e => {
+  const questions = await addQuestionToEpisode(docQuestionText.value, docQuestionCat.options[docQuestionCat.selectedIndex].dataset.id, docContributor.value, docLocation.value);
+  buildQuestionRows(questions.questions);
 });
 
 docSubmitNewGuest.addEventListener("click", async e => {
@@ -20,6 +41,7 @@ docSubmitNewGuest.addEventListener("click", async e => {
     const guestData = await insertGuest(guest);
     const guests = await addGuestToEpisode(guestData);
     buildGuestRows(guests);
+    docGuestInput.value = '';
 });
 
 docSubmitPastGuest.addEventListener("click", async e => {
@@ -27,6 +49,7 @@ docSubmitPastGuest.addEventListener("click", async e => {
     const guestData = await getGuest(guest);
     const guests = await addGuestToEpisode(guestData);
     buildGuestRows(guests);
+    docGuestSelect.selectedIndex = 0;
 });
 
 docGetNextEpNo.addEventListener("click", async e => {
@@ -75,7 +98,11 @@ const addGuestToEpisode = async (guestData) => {
 }
 
 const deleteGuestFromEpisode = async (guestID) => {
-  await fetch(`${SERVER_ADDR_BASE}/delete-guest-from-episode?guestid=?${guestID}&episodeid=${docEpisodeNo.value}`);
+  await fetch(`${SERVER_ADDR_BASE}/delete-guest-from-episode?guestid=${guestID}&episodeid=${docEpisodeNo.value}`);
+}
+
+const deleteQuestionFromEpisode = async (questionID) => {
+  await fetch(`${SERVER_ADDR_BASE}/delete-question-from-episode?questionid=${questionID}&episodeid=${docEpisodeNo.value}`);
 }
 
 const insertGuest = async (guestName) => {
@@ -88,6 +115,41 @@ const getGuest = async (guestName) => {
   const guestDB = await fetch(`${SERVER_ADDR_BASE}/get-guest?guest=${guestName}`)
   const data = await guestDB.json();
   return data;
+}
+
+const addQuestionToEpisode = async (question, categoryID, contributor, location) => {
+  const questionDB = await fetch(`${SERVER_ADDR_BASE}/add-question-to-episode?episodeid=${docEpisodeNo.value}&question=${question}&categoryid=${categoryID}&contributor=${contributor}&location=${location}`);
+  const data = questionDB.json();
+  return data;
+}
+
+const buildQuestionRows = (questions) => {
+  console.log(questions);
+  docQuestionsBody.innerHTML = "";
+  for (let question of questions) {
+    questionHTMl = `
+      <td>
+        <span class="icon trash" data-guest="${question.id}">
+          <i class="fas fa-trash"></i>
+        </span>
+      </td>
+      <td>${question.number}</td>
+      <td>${question.question}</td>
+      <td>${question.category}</td>
+      <td>${question.contributor}</td>
+      <td>${question.location}</td>
+    `;
+    let q = document.createElement('tr');
+    q.innerHTML = questionHTMl;
+    let trash = q.querySelector(".trash");
+    trash.addEventListener("click", async e => {
+      let row = trash.parentElement.parentElement;
+      let questionID = row.children[1].innerText;
+      await deleteQuestionFromEpisode(questionID);
+      row.remove();
+    });
+    docQuestionsBody.appendChild(q);
+  }
 }
 
 const buildGuestRows = (guests) => {

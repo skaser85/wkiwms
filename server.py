@@ -4,7 +4,11 @@ This is the server file that serves the webpages and talks to the database.
 
 from flask import Flask, render_template, request
 from flask_cors import CORS
-from episode import get_episodes, get_guests, get_next_episode, get_guest, insert_guest, add_guest_to_episode, get_guests_for_episode, add_record_date, delete_guests_on_episode, delete_guest_on_episode
+# from flask_talisman import Talisman
+from episode import get_episodes, get_guests, get_next_episode, get_guest, insert_guest, add_guest_to_episode,\
+                    get_guests_for_episode, add_record_date, delete_guests_on_episode, delete_guest_on_episode,\
+                    get_default_episode_data, add_question_to_episode, create_question, get_questions_for_episode,\
+                    delete_question_from_episode, delete_questions_from_episode
 
 app = Flask(__name__)
 CORS(app)
@@ -17,7 +21,7 @@ def index():
 @app.route('/addEpisodeData')
 def addEpisodeData():
     """ serves the addEpisodeData page"""
-    return render_template('addEpisodeData.html', guests=get_guests())
+    return render_template('addEpisodeData.html', data=get_default_episode_data())
 
 @app.route('/get-next-episode-number')
 def get_next_episode_number():
@@ -56,6 +60,32 @@ def delete_guest_on_episode_():
     """ deletes a single guest from episode """
     delete_guest_on_episode(request.args.get('episodeid'), request.args.get('guestid'))
     return {'guests': get_guests(), 'guestsOnEpisode': get_guests_for_episode(request.args.get('episodeid'))}
+
+@app.route('/add-question-to-episode')
+def add_question_to_episode_():
+    """ adds a question to an episode """
+    episode_id = request.args.get('episodeid')
+    question = request.args.get('question')
+    category_id = request.args.get('categoryid')
+    contributor = request.args.get('contributor')
+    location = request.args.get('location')
+    question_db = create_question(question, category_id, contributor, location)
+    add_question_to_episode(episode_id, question_db[0])
+    return {'questions': get_questions_for_episode(episode_id)}
+
+@app.route('/delete-question-from-episode')
+def delete_question_from_episode_():
+    """ deletes a question from an episode """
+    delete_question_from_episode(request.args.get('episodeid'), request.args.get('questionid'))
+    return {'questions': get_questions_for_episode(request.args.get('episodeid'))}
+
+@app.route('/delete-questions-from-episode')
+def delete_questions_from_episode_():
+    """ deletes all questions from an episode """
+    delete_questions_from_episode(request.args.get('episodeid'))
+    return {'questions': []}
+
+# Talisman(app, content_security_policy=None)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8008, debug=True)
