@@ -3,6 +3,7 @@ const SERVER_ADDR_BASE = `http://${window.location.hostname}:${window.location.p
 const docGetNextEpNo = document.querySelector("#get-next-episode-number");
 const docEpisodeNo = document.querySelector("#episode-number");
 const docRecordDate = document.querySelector("#record-date");
+
 const docSubmitPastGuest = document.querySelector("#submit-past-guest");
 const docSubmitNewGuest = document.querySelector("#submit-new-guest");
 const docGuestSelect = document.querySelector("#guest-select");
@@ -16,19 +17,23 @@ const docContributor = document.querySelector("#contributor-name");
 const docLocation = document.querySelector("#location-text");
 const docQuestionsBody = document.querySelector("#questions-body");
 
+const docModal = document.querySelector("#modal");
+const docModalTitle = document.querySelector("#modal-title")
+const docModalContent = document.querySelector("#modal-content")
+const docModalLeftBtn = document.querySelector("#left-button");
+const docModalRightBtn = document.querySelector("#right-button");
+
 const docDeleteGuests = document.querySelector("#delete-guests");
 const docDeleteQuestions = document.querySelector("#delete-all-questions");
 
 docDeleteGuests.addEventListener("click", async e => {
-  const delGuests = fetch(`${SERVER_ADDR_BASE}/delete-guests-on-episode?episodeid=${docEpisodeNo.value}`);
-  const guests = await delGuests.json();
-  buildGuestRows(guests);
+  setupModal('Delete guests', 'Are you sure you want to delete all guests from the episode?', 'Confirm', deleteAllGuests, 'Cancel', closeActiveModal);
+  openModal(docModal);
 });
 
 docDeleteQuestions.addEventListener("click", async e => {
-  const delQuestions = fetch(`${SERVER_ADDR_BASE}/delete-questions-from-episode?episodeid=${docEpisodeNo.value}`);
-  const questions = await delQuestions.json();
-  buildQuestionRows(questions.questions);
+  setupModal('Delete questions', 'Are you sure you want to delete all questions from the episode?', 'Confirm', deleteAllQuestions, 'Cancel', closeActiveModal);
+  openModal(docModal);
 });
 
 docAddQuestion.addEventListener("click", async e => {
@@ -124,7 +129,6 @@ const addQuestionToEpisode = async (question, categoryID, contributor, location)
 }
 
 const buildQuestionRows = (questions) => {
-  console.log(questions);
   docQuestionsBody.innerHTML = "";
   for (let question of questions) {
     questionHTMl = `
@@ -175,4 +179,60 @@ const buildGuestRows = (guests) => {
     });
     docGuestsBody.appendChild(g);
   }
+}
+
+const setupModal = (title, content, leftBtnText, leftBtnAction, rightBtnText, rightBtnAction) => {
+  docModalTitle.innerText = title;
+  docModalContent.innerText = content;
+  docModalLeftBtn.innerText = leftBtnText;
+  docModalRightBtn.innerText = rightBtnText;
+  docModalLeftBtn.addEventListener("click", leftBtnAction);
+  docModalRightBtn.addEventListener("click", rightBtnAction);
+}
+
+const openModal = ($el) => {
+  $el.classList.add('is-active');
+}
+
+const closeModal = ($el) => {
+  $el.classList.remove('is-active');
+}
+
+const closeActiveModal = () => {
+  closeModal(docModal);
+}
+
+const closeAllModals = () => {
+  (document.querySelectorAll('.modal') || []).forEach(($modal) => {
+    closeModal($modal);
+  });
+}
+
+(document.querySelectorAll('.modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button') || []).forEach(($close) => {
+  const $target = $close.closest('.modal');
+
+  $close.addEventListener('click', () => {
+    closeModal($target);
+  });
+});
+
+// Add a keyboard event to close all modals
+document.addEventListener('keydown', (event) => {
+  const e = event || window.event;
+
+  if (e.key === "Escape") { // Escape key
+    closeAllModals();
+  }
+});
+
+const deleteAllGuests = async () => {
+  const delGuests = await fetch(`${SERVER_ADDR_BASE}/delete-guests-on-episode?episodeid=${docEpisodeNo.value}`);
+  const guests = await delGuests.json();
+  buildGuestRows(guests);
+}
+
+const deleteAllQuestions = async () => {
+  const delQuestions = await fetch(`${SERVER_ADDR_BASE}/delete-questions-from-episode?episodeid=${docEpisodeNo.value}`);
+  const questions = await delQuestions.json();
+  buildQuestionRows(questions.questions);
 }

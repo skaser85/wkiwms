@@ -53,7 +53,7 @@ def add_record_date_data():
 def delete_guests_on_episode_():
     """ deletes all guests from episode """
     delete_guests_on_episode(request.args.get('episodeid'))
-    return {'guests': get_guests(), 'guestsOnEpisode': {}}
+    return {'guests': get_guests(), 'guestsOnEpisode': []}
 
 @app.route('/delete-guest-from-episode')
 def delete_guest_on_episode_():
