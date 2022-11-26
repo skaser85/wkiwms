@@ -84,8 +84,15 @@ def get_default_episode_data() -> dict:
     """ Gets the data for the adddEpisodeData webpage """
     return {
         'guests': get_guests(),
-        'categories': get_question_categories()
+        'categories': get_question_categories(),
+        'types': get_answer_types()
     }
+
+def get_answer_types() -> list[dict]:
+    """ Gets a list of the answer types """
+    with DBHandler(DB_PATH) as db:
+        db_types = db.fetch_all('SELECT * FROM answer_type')
+        return [{'id': t[0], 'type': t[1]} for t in db_types]
 
 def create_question(question: str, category_id: int, contributor: str, location: str) -> tuple:
     with DBHandler(DB_PATH) as db:

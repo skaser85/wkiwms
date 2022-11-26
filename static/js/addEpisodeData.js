@@ -23,6 +23,13 @@ const docModalContent = document.querySelector("#modal-content")
 const docModalLeftBtn = document.querySelector("#left-button");
 const docModalRightBtn = document.querySelector("#right-button");
 
+const docAnswersBody = document.querySelector("#answers-body");
+const docAnswerText = document.querySelector("#answer-text");
+const docAnswerTypes = document.querySelector("#type-select");
+const docAnswerGuest = document.querySelector("#guest-select");
+const docAnswerLink = document.querySelector("#link");
+const docAnswerFunFact = document.querySelector("#fun-fact");
+
 const docDeleteGuests = document.querySelector("#delete-guests");
 const docDeleteQuestions = document.querySelector("#delete-all-questions");
 
@@ -179,6 +186,71 @@ const buildGuestRows = (guests) => {
     });
     docGuestsBody.appendChild(g);
   }
+}
+
+const buildAnswerRows = (answers) => {
+  docAnswersBody.innerHTML = "";
+  for (let answer of answers) {
+    let answerHTML = `
+      <tr>
+      <td>
+        <span class="icon trash" data-id="${answer.id}">
+          <i class="fas fa-trash"></i>
+        </span>
+      </td>
+      <td contenteditable="true"></td>
+      <td>
+        <div class="control">
+          <div class="select">
+            <select>
+            ${addTypeOptions()}
+            </select>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div class="control">
+          <div class="select">
+            <select>
+            ${addGuestsOnEpisode()}
+            </select>
+          </div>
+        </div>
+      </td>
+      <td contenteditable="true"></td>
+      <td contenteditable="true"></td>
+    </tr>
+    `;
+    let a = document.createElement('tr');
+    a.innerHTML = answerHTML;
+    let trash = a.querySelector(".trash");
+    trash.addEventListener("click", async e => {
+      let row = trash.parentElement.parentElement;
+      let answerID = row.children[1].innerText;
+      await deleteAnswerFromQuestion(answerID);
+      row.remove();
+    });
+    docAnswersBody.appendChild(a);
+  }
+}
+
+const addTypeOptions = () => {
+  let typeOptions = "";
+  for (let type of docAnswerTypes.options) {
+    typeOptions += `<option ${type.hasAttribute("data-id") ? `data-id="${type.dataset.id}"` : ""}>${type.value}</option>`;
+  }
+  return typeOptions;
+}
+
+const addGuestsOnEpisode = () => {
+  let guestOptions = "<option></option>";
+  for (let guestRow of docGuestsBody.querySelectorAll('tr')) {
+    let guestTDs = guestRow.querySelectorAll('td');
+    let id = guestTDs[0].querySelector('span').dataset.guest;
+    let name = guestTDs[2].innerText;
+    guestOptions += `<option data-id="${id}">${name}</option>`
+  }
+  return guestOptions;
 }
 
 const setupModal = (title, content, leftBtnText, leftBtnAction, rightBtnText, rightBtnAction) => {

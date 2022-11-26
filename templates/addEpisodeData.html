@@ -152,6 +152,83 @@
         <tbody id="questions-body"></tbody>
       </table>
     </div>
+    <div class="container" id="answers-conatiner">
+      <h1 class="title">Answers</h1>
+      <div class="field">
+        <label class="label">Select a Question</label>
+        <div class="control">
+          <div class="select">
+            <select id="question-select"></select>
+          </div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="field">
+          <label class="label">Answer</label>
+          <div class="control">
+            <input class="input" type="text" id="answer-text">
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Type</label>
+          <div class="control">
+            <div class="select">
+              <select id="type-select">
+                <option></option>
+                {% for type in data.types %}
+                <option data-id="{{ type.id }}">{{ type.type }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Guest</label>
+          <div class="control">
+            <div class="select">
+              <select id="guest-select">
+                <option></option>
+                <option data-id="2">Dave Warneke</option>
+                <option data-id="8">Kirsty Webeck</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="container">
+          <div class="field">
+            <label class="label">Link</label>
+            <div class="control">
+              <input class="input" type="text" id="link">
+            </div>
+          </div>
+        </div>
+        <div class="container">
+          <div class="field">
+            <label class="label">Fun Fact</label>
+            <div class="control">
+              <input class="input" type="text" id="fun-fact">
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="button is-primary" id="add-answer">Add Answer For Question</button>
+      <button class="button is-danger" id="delete-all-answers">Delete All Answers For Question</button>
+      <table class="table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>ID</th>
+            <th>Answer</th>
+            <th>Type</th>
+            <th>Guest</th>
+            <th>Link</th>
+            <th>Fun Fact</th>
+          </tr>
+        </thead>
+        <tbody id="answers-body"></tbody>
+      </table>
+    </div>
+    <!-- MODAL -->
     <div class="modal" id="modal">
       <div class="modal-background"></div>
       <div class="modal-card">
