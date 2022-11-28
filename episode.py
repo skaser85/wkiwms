@@ -93,8 +93,26 @@ def get_answer_types() -> list[dict]:
     with DBHandler(DB_PATH) as db:
         db_types = db.fetch_all('SELECT * FROM answer_type')
         return [{'id': t[0], 'type': t[1]} for t in db_types]
+    
+def add_answer_to_question(question_id: int, answer: str, type_id: int, guest_id: int, link: str, fun_fact: str) -> None:
+    """ Adds an answer to the question """
+    with DBHandler(DB_PATH) as db:
+        db_answer = db.insert('INSERT INTO answer (question_id, answer, type_id, guest_id, link, fun_fact) VALUES (?,?,?,?,?,?)', (question_id, answer, type_id, guest_id, link, fun_fact))
+
+def get_answers_for_question(question_id: int) -> list[dict]:
+    """ Gets answers for question """
+    with DBHandler(DB_PATH) as db:
+        db_answers = db.fetch_all('SELECT * FROM answer WHERE question_id=?', (question_id,))
+        answers = []
+        for a in db_answers:
+            answer_type = '' if a[3] == '' else get_answer_type_from_id(a[3])
+            guest_name = '' if a[4] == '' else get_guest_name_from_id(a[4])
+            answer = Answer(a[0], a[2], answer_type, guest_name, a[5], a[6])
+            answers.append(answer)
+        return [a.to_dict() for a in answers]
 
 def create_question(question: str, category_id: int, contributor: str, location: str) -> tuple:
+    """ Create the question """
     with DBHandler(DB_PATH) as db:
         db_question = db.insert('INSERT INTO question (question, category_id, contributor_name, contributor_location) values (?, ?, ?, ?)', (question, category_id, contributor, location))
         return db.fetch_one('SELECT * FROM question where id=?', (db_question.lastrowid,))
@@ -116,18 +134,46 @@ def get_questions_for_episode(episode_id: int) -> list[dict]:
         return [q.to_dict() for q in questions]
     
 def get_question_category_from_id(category_id: int) -> str:
+    """ Gets the category type text based on the category id"""
     with DBHandler(DB_PATH) as db:
         db_cat = db.fetch_one('SELECT * FROM question_category WHERE id=?', (category_id,))
-        category = db_cat[1]
-        return category
+        return db_cat[1]
+    
+def get_answer_type_from_id(answer_type_id: int) -> str:
+    """ Gets the answer type text based on the answer type id"""
+    with DBHandler(DB_PATH) as db:
+        db_ans_type = db.fetch_one('SELECT * FROM answer_type WHERE id=?', (answer_type_id,))
+        return db_ans_type[1]
+    
+def get_guest_name_from_id(guest_id: int) -> str:
+    """ Gets the guest name from the guest id """
+    with DBHandler(DB_PATH) as db:
+        db_guest = db.fetch_one('SELECT * FROM guest WHERE id=?', (guest_id,))
+        return db_guest[1]
     
 def delete_question_from_episode(episode_id: int, question_id: int) -> None:
+    """ Deletes the question from the episode """
     with DBHandler(DB_PATH) as db:
+        delete_answers_from_question(question_id)
         db.delete('DELETE FROM episode_question WHERE episode_id=? AND question_id=?', (episode_id, question_id))
 
 def delete_questions_from_episode(episode_id: int) -> None:
+    """ Deletes all questions from the episode """
+    questions = get_questions_for_episode(episode_id)
+    for question in questions:
+        delete_answers_from_question(question[0])
     with DBHandler(DB_PATH) as db:
         db.delete('DELETE FROM episode_question WHERE episode_id=?', (episode_id,))
+
+def delete_answer_from_question(question_id: int, answer_id: int) -> None:
+    """ Deletes an answer from a question """
+    with DBHandler(DB_PATH) as db:
+        db.delete('DELETE FROM answer WHERE question_id=? AND id=?', (question_id, answer_id))
+
+def delete_answers_from_question(question_id: int) -> None:
+    """ Deletes all answers from a question """
+    with DBHandler(DB_PATH) as db:
+        db.delete('DELTE FROM answer WHERE question_id=?', (question_id,))
 
 def get_episodes() -> List[dict]:
     """ Gets the episodes from the db. """
@@ -189,12 +235,10 @@ def get_episodes() -> List[dict]:
                 # get answers
                 db_answers = db.fetch_all('SELECT * FROM answer WHERE question_id=?', (q.number,))
                 for dba in db_answers:
-                    db_ans_type = db.fetch_one('SELECT * FROM answer_type WHERE id=?', (dba[3],))
-                    answer_type = db_ans_type[1]
+                    answer_type = get_answer_type_from_id(dba[3])
                     guest_name = ''
-                    if dba[4] is not None:
-                        db_guest = db.fetch_one('SELECT * FROM guest WHERE id=?', (dba[4],))
-                        guest_name = db_guest[1]
+                    if dba[4] is not None and dba[4] != '':
+                        guest_name = get_guest_name_from_id(dba[4])
                     answer = Answer(dba[0], dba[2], answer_type, guest_name, dba[5], dba[6])
                     q.answers.append(answer)
                 # add question to questions
@@ -215,6 +259,10 @@ class Answer:
     guest: str = ''
     link: str = ''
     fun_fact: str = ''
+
+    def to_dict(self) -> dict:
+        """ Returns this Answer object as a dict """
+        return asdict(self)
 
 @dataclass
 class Question:

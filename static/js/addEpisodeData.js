@@ -16,6 +16,7 @@ const docQuestionCat = document.querySelector("#category-select");
 const docContributor = document.querySelector("#contributor-name");
 const docLocation = document.querySelector("#location-text");
 const docQuestionsBody = document.querySelector("#questions-body");
+const docGetAllQuestions = document.querySelector("#get-all-questions");
 
 const docModal = document.querySelector("#modal");
 const docModalTitle = document.querySelector("#modal-title")
@@ -23,15 +24,19 @@ const docModalContent = document.querySelector("#modal-content")
 const docModalLeftBtn = document.querySelector("#left-button");
 const docModalRightBtn = document.querySelector("#right-button");
 
+const docQuestionsSelect = document.querySelector("#question-select");
 const docAnswersBody = document.querySelector("#answers-body");
 const docAnswerText = document.querySelector("#answer-text");
 const docAnswerTypes = document.querySelector("#type-select");
-const docAnswerGuest = document.querySelector("#guest-select");
+const docAnswerGuest = document.querySelector("#guest-select-on-episode");
 const docAnswerLink = document.querySelector("#link");
 const docAnswerFunFact = document.querySelector("#fun-fact");
+const docAddAnswerBtn = document.querySelector("#add-answer");
+const docGetAnswersBtn = document.querySelector("#get-all-answers");
 
 const docDeleteGuests = document.querySelector("#delete-guests");
 const docDeleteQuestions = document.querySelector("#delete-all-questions");
+const docDeleteAnswers = document.querySelector("#delete-all-answers");
 
 docDeleteGuests.addEventListener("click", async e => {
   setupModal('Delete guests', 'Are you sure you want to delete all guests from the episode?', 'Confirm', deleteAllGuests, 'Cancel', closeActiveModal);
@@ -43,9 +48,52 @@ docDeleteQuestions.addEventListener("click", async e => {
   openModal(docModal);
 });
 
+docDeleteAnswers.addEventListener("click", async e => {
+  setupModal('Delete answers', 'Are you sure you want to delete all answers for the question?', 'Confirm', deleteAllAnswers, 'Cancel', closeActiveModal);
+  openModal(docModal);
+});
+
+docGetAnswersBtn.addEventListener("click", async e => {
+  if (!getSelectedOption(docQuestionsSelect))
+    return;
+  let questionSelect = getSelectedOption(docQuestionsSelect);
+  let questionID = questionSelect.dataset.id;
+  const answersDB = await fetch(`${SERVER_ADDR_BASE}/get-answers-for-question?questionid=${questionID}`);
+  const answers = await answersDB.json();
+  buildAnswerRows(answers.answers);
+});
+
+docGetAllQuestions.addEventListener("click", async e => {
+  const questionsDB = await fetch(`${SERVER_ADDR_BASE}/get-questions-for-episode?episodeid=${docEpisodeNo.value}`);
+  const questions = await questionsDB.json();
+  const guestsDB = await fetch(`${SERVER_ADDR_BASE}/get-guests-for-episode?episodeid=${docEpisodeNo.value}`);
+  const guests = await guestsDB.json();
+  buildGuestOnEpisodeForAnswer(guests.guests);
+  buildQuestionSelectForAnswer(questions.questions);
+  buildQuestionRows(questions.questions);
+});
+
 docAddQuestion.addEventListener("click", async e => {
   const questions = await addQuestionToEpisode(docQuestionText.value, docQuestionCat.options[docQuestionCat.selectedIndex].dataset.id, docContributor.value, docLocation.value);
+  const guestsDB = await fetch(`${SERVER_ADDR_BASE}/get-guests-for-episode?episodeid=${docEpisodeNo.value}`);
+  const guests = await guestsDB.json();
+  buildGuestOnEpisodeForAnswer(guests.guests);
+  buildQuestionSelectForAnswer(questions.questions);
   buildQuestionRows(questions.questions);
+});
+
+docAddAnswerBtn.addEventListener("click", async e => {
+  console.log(getSelectedOption(docQuestionsSelect));
+  if (!getSelectedOption(docQuestionsSelect))
+    return;
+  let selectedType = getSelectedOption(docAnswerTypes);
+  let typeID = selectedType.hasAttribute("data-id") ? selectedType.dataset.id : "";
+  let selectedGuest = getSelectedOption(docAnswerGuest);
+  console.log(selectedGuest);
+  let guestID = selectedGuest.hasAttribute("data-id") ? selectedGuest.dataset.id : "";
+  console.log("guest id = ", guestID);
+  const answers = await addAnswerToQuestion(docAnswerText.value, typeID, guestID, docAnswerLink.value, docAnswerFunFact.value);
+  buildAnswerRows(answers.answers);
 });
 
 docSubmitNewGuest.addEventListener("click", async e => {
@@ -131,14 +179,21 @@ const getGuest = async (guestName) => {
 
 const addQuestionToEpisode = async (question, categoryID, contributor, location) => {
   const questionDB = await fetch(`${SERVER_ADDR_BASE}/add-question-to-episode?episodeid=${docEpisodeNo.value}&question=${question}&categoryid=${categoryID}&contributor=${contributor}&location=${location}`);
-  const data = questionDB.json();
+  const data = await questionDB.json();
+  return data;
+}
+
+const addAnswerToQuestion = async (text, typeID, guestID, link, funFact) => {
+  console.log(`question id = ${getSelectedOption(docQuestionsSelect).dataset.id}`);
+  const answerDB = await fetch(`${SERVER_ADDR_BASE}/add-answer-to-question?questionid=${getSelectedOption(docQuestionsSelect).dataset.id}&answer=${text}&typeid=${typeID}&guestid=${guestID}&link=${link}&funfact=${funFact}`)
+  const data = await answerDB.json();
   return data;
 }
 
 const buildQuestionRows = (questions) => {
   docQuestionsBody.innerHTML = "";
   for (let question of questions) {
-    questionHTMl = `
+    let questionHTMl = `
       <td>
         <span class="icon trash" data-guest="${question.id}">
           <i class="fas fa-trash"></i>
@@ -189,6 +244,7 @@ const buildGuestRows = (guests) => {
 }
 
 const buildAnswerRows = (answers) => {
+  console.log(answers);
   docAnswersBody.innerHTML = "";
   for (let answer of answers) {
     let answerHTML = `
@@ -198,12 +254,13 @@ const buildAnswerRows = (answers) => {
           <i class="fas fa-trash"></i>
         </span>
       </td>
-      <td contenteditable="true"></td>
+      <td>${answer.id}</td>
+      <td contenteditable="true">${answer.answer}</td>
       <td>
         <div class="control">
           <div class="select">
-            <select>
-            ${addTypeOptions()}
+            <select class="type-select">
+            ${addTypeOptions(answer.type)}
             </select>
           </div>
         </div>
@@ -211,14 +268,14 @@ const buildAnswerRows = (answers) => {
       <td>
         <div class="control">
           <div class="select">
-            <select>
-            ${addGuestsOnEpisode()}
+            <select class="guest-select">
+            ${addGuestsOnEpisode(answer.guest)}
             </select>
           </div>
         </div>
       </td>
-      <td contenteditable="true"></td>
-      <td contenteditable="true"></td>
+      <td contenteditable="true">${answer.link}</td>
+      <td contenteditable="true">${answer.fun_fact}</td>
     </tr>
     `;
     let a = document.createElement('tr');
@@ -230,7 +287,19 @@ const buildAnswerRows = (answers) => {
       await deleteAnswerFromQuestion(answerID);
       row.remove();
     });
+    let types = a.querySelector(".type-select");
+    let guests = a.querySelector(".guest-select");
+    setSelected(types, answer.type);
+    setSelected(guests, answer.guest);
     docAnswersBody.appendChild(a);
+  }
+}
+
+const setSelected = (select, selectedText) => {
+  for (let i = 0; i < select.options.length; i++) {
+    if (select.options[i].value === selectedText) {
+      select.selectedIndex = i;
+    }
   }
 }
 
@@ -297,6 +366,16 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
+const deleteAnswerFromQuestion = async (answerID) => {
+  if (!getSelectedOption(docQuestionsSelect))
+    return;
+  let questionSelect = getSelectedOption(docQuestionsSelect);
+  let questionID = questionSelect.dataset.id;
+  const answersDB = await fetch(`${SERVER_ADDR_BASE}/delete-answer-from-question?answerid=${answerID}&questionid=${questionID}`);
+  const answers = await answersDB.json();
+  buildAnswerRows(answers.answers);
+}
+
 const deleteAllGuests = async () => {
   const delGuests = await fetch(`${SERVER_ADDR_BASE}/delete-guests-on-episode?episodeid=${docEpisodeNo.value}`);
   const guests = await delGuests.json();
@@ -307,4 +386,32 @@ const deleteAllQuestions = async () => {
   const delQuestions = await fetch(`${SERVER_ADDR_BASE}/delete-questions-from-episode?episodeid=${docEpisodeNo.value}`);
   const questions = await delQuestions.json();
   buildQuestionRows(questions.questions);
+}
+
+const deleteAllAnswers = async () => {
+  const delAnswers = await fetch(`${SERVER_ADDR_BASE}/delete-answers-for-question?questionid=${getSelectedOption(docQuestionsSelect).value}`);
+  const answers = await delAnswers.json();
+  buildAnswerRows(answers.answers);
+}
+
+const getSelectedOption = (select) => {
+  return select.options[select.selectedIndex];
+}
+
+const buildQuestionSelectForAnswer = (questions) => {
+  docQuestionsSelect.innerHTML = "";
+  let questionHTML = "<option></option>";
+  for (let question of questions) {
+    questionHTML += `<option data-id=${question.number}>${question.question}</option>`;
+  }
+  docQuestionsSelect.innerHTML = questionHTML;
+}
+
+const buildGuestOnEpisodeForAnswer = (guests) => {
+  docAnswerGuest.innerHTML = "";
+  let guestHTML = "<option></option>";
+  for (let guest of guests) {
+    guestHTML += `<option data-id=${guest.id}>${guest.name}</option>`;
+  }
+  docAnswerGuest.innerHTML = guestHTML;
 }

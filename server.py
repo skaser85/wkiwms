@@ -8,7 +8,8 @@ from flask_cors import CORS
 from episode import get_episodes, get_guests, get_next_episode, get_guest, insert_guest, add_guest_to_episode,\
                     get_guests_for_episode, add_record_date, delete_guests_on_episode, delete_guest_on_episode,\
                     get_default_episode_data, add_question_to_episode, create_question, get_questions_for_episode,\
-                    delete_question_from_episode, delete_questions_from_episode
+                    delete_question_from_episode, delete_questions_from_episode, add_answer_to_question, get_answers_for_question,\
+                    delete_answer_from_question, delete_answers_from_question
 
 app = Flask(__name__)
 CORS(app)
@@ -84,6 +85,45 @@ def delete_questions_from_episode_():
     """ deletes all questions from an episode """
     delete_questions_from_episode(request.args.get('episodeid'))
     return {'questions': []}
+
+@app.route('/add-answer-to-question')
+def add_answer_to_question_():
+    """ adds an answer to question """
+    question_id = request.args.get('questionid')
+    answer = request.args.get('answer')
+    type_id = request.args.get('typeid')
+    guest_id = request.args.get('guestid')
+    link = request.args.get('link')
+    fun_fact = request.args.get('funfact')
+    add_answer_to_question(question_id, answer, type_id, guest_id, link, fun_fact)
+    return {'answers': get_answers_for_question(question_id)}
+
+@app.route('/delete-answer-from-question')
+def delete_answer_from_question_():
+    """ deletes an answer from the question """
+    delete_answer_from_question(request.args.get('questionid'), request.args.get('answerid'))
+    return {'answers': get_answers_for_question(request.args.get('questionid'))}
+
+@app.route('/delete-answers-from-question')
+def delete_answers_from_question_():
+    """ deletes all answers from the qustion """
+    delete_answers_from_question(request.args.get('questionid'))
+    return {'answers': []}
+
+@app.route('/get-questions-for-episode')
+def get_questions_for_episode_():
+    """ gets questions for the episodes """
+    return {'questions': get_questions_for_episode(request.args.get('episodeid'))}
+
+@app.route('/get-guests-for-episode')
+def get_guests_for_episode_():
+    """ gets the guests for the episode """
+    return {'guests': get_guests_for_episode(request.args.get('episodeid'))}
+
+@app.route('/get-answers-for-question')
+def get_answers_for_questions_():
+    """ gets the answers for the question """
+    return {'answers': get_answers_for_question(request.args.get('questionid'))}
 
 # Talisman(app, content_security_policy=None)
 

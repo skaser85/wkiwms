@@ -136,7 +136,8 @@
           <input class="input" type="text" id="location-text">
         </div>
       </div>
-      <button class="button is-primary" id="add-question">Add Question to Episdoe</button>
+      <button class="button is-primary" id="add-question">Add Question to Episode</button>
+      <button class="button is-success" id="get-all-questions">Get Questions for Episode</button>
       <button class="button is-danger" id="delete-all-questions">Delete All Questions for Episode</button>
       <table class="table">
         <thead>
@@ -186,11 +187,7 @@
           <label class="label">Guest</label>
           <div class="control">
             <div class="select">
-              <select id="guest-select">
-                <option></option>
-                <option data-id="2">Dave Warneke</option>
-                <option data-id="8">Kirsty Webeck</option>
-              </select>
+              <select id="guest-select-on-episode"></select>
             </div>
           </div>
         </div>
@@ -212,6 +209,7 @@
         </div>
       </div>
       <button class="button is-primary" id="add-answer">Add Answer For Question</button>
+      <button class="button is-success" id="get-all-answers">Get Answers For Question</button>
       <button class="button is-danger" id="delete-all-answers">Delete All Answers For Question</button>
       <table class="table">
         <thead>
