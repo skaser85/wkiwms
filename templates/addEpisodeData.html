@@ -24,10 +24,15 @@
           <div class="navbar-start">
             <a class="navbar-item" href="{{ url_for('index') }}">Episodes</a>
             <a class="navbar-item" href="{{ url_for('addEpisodeData') }}">Add Episode</a>
+            <a class="navbar-item" href="{{ url_for('editEpisodeData') }}">Edit Episode</a>
         </div>
     </nav>
     <!-- FORM -->
     <div class="container" id="episode-form-container">
+      
+      
+      
+      
       <div class="container mb-4">
         <h1 class="title">General</h1>
         <div class="field">
@@ -44,6 +49,12 @@
           </div>
         </div>
       </div>
+
+
+
+
+
+
       <div class="container" id="guest-conatiner">
         <h1 class="title">Guests</h1>
         <div class="container" id="guest-row">
@@ -102,6 +113,10 @@
           </tbody>
         </table>
       </div>
+
+
+
+
       <div class="container" id="question-conatiner">
         <h1 class="title">Questions</h1>
         <div class="field">
@@ -153,6 +168,10 @@
         <tbody id="questions-body"></tbody>
       </table>
     </div>
+
+    
+
+    
     <div class="container" id="answers-conatiner">
       <h1 class="title">Answers</h1>
       <div class="field">

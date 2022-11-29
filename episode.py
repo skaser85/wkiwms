@@ -88,6 +88,28 @@ def get_default_episode_data() -> dict:
         'types': get_answer_types()
     }
 
+def get_record_date(episode_id: int) -> str:
+    """ Gets the record date for the episode """
+    with DBHandler(DB_PATH) as db:
+        db_date = db.fetch_one('SELECT record_date FROM episode WHERE number=?', (episode_id,))
+        d = str(db_date[0])
+        if '-' in d:
+            return d
+        d = f'{d[:4]}-{d[4:6]}-{d[6:]}'
+        return d
+
+def get_episode_data(episode_id: int) -> dict:
+    """ Gets the data for the edit episode webpage """
+    return {
+        'number': episode_id,
+        'record_date': get_record_date(episode_id),
+        'guests': get_guests(),
+        'questions': get_questions_for_episode(episode_id),
+        'categories': get_question_categories(),
+        'types': get_answer_types(),
+        'guestsOnEpisode': get_guests_for_episode(episode_id),
+    }
+
 def get_answer_types() -> list[dict]:
     """ Gets a list of the answer types """
     with DBHandler(DB_PATH) as db:
@@ -173,7 +195,7 @@ def delete_answer_from_question(question_id: int, answer_id: int) -> None:
 def delete_answers_from_question(question_id: int) -> None:
     """ Deletes all answers from a question """
     with DBHandler(DB_PATH) as db:
-        db.delete('DELTE FROM answer WHERE question_id=?', (question_id,))
+        db.delete('DELETE FROM answer WHERE question_id=?', (question_id,))
 
 def get_episodes() -> List[dict]:
     """ Gets the episodes from the db. """
@@ -213,7 +235,7 @@ def get_episodes() -> List[dict]:
         db_episodes = db.fetch_all('SELECT * FROM episode')
         episodes = []
         for episode in db_episodes:
-            e = Episode(episode[0], episode[1])
+            e = Episode(episode[0], get_record_date(episode[0]))
             # get guests for episode
             db_ep_guests = db.fetch_all('SELECT * FROM episode_guest WHERE episode_id=?', (episode[0],))
             guests = []
@@ -305,5 +327,6 @@ if __name__ == '__main__':
     # pprint(get_episodes())
     # delete_guest_on_episode(3, 2)
     # pprint(get_question_categories())
-    add_question_to_episode(3, 8)
-    print(get_questions_for_episode(3))
+    # add_question_to_episode(3, 8)
+    # print(get_questions_for_episode(3))
+    print(get_record_date(3))

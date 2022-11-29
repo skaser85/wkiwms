@@ -23,13 +23,9 @@
       
         <div id="navbarBasicExample" class="navbar-menu">
           <div class="navbar-start">
-            <a class="navbar-item" href="{{ url_for('index') }}">
-              Episodes
-            </a>
-      
-            <a class="navbar-item" href="{{ url_for('addEpisodeData') }}">
-              Add Episode
-            </a>
+            <a class="navbar-item" href="{{ url_for('index') }}">Episodes</a>
+            <a class="navbar-item" href="{{ url_for('addEpisodeData') }}">Add Episode</a>
+            <a class="navbar-item" href="{{ url_for('editEpisodeData') }}">Edit Episode</a>
         </div>
     </nav>
     <div class="container" id="episodes-container">
@@ -46,6 +42,10 @@
             </button>
             </header>
             <div class="content episode-content is-hidden">
+                <div class="container is-flex is-flex is-justify-content-flex-end p-1">
+                    <!-- <button class="button is-link edit-button" data-id="{{ episode.number }}"><i class="fas fa-pen-to-square" aria-hidden="true">&nbsp;</i>Edit Episode Data</button> -->
+                    <a class="navbar-item" href="{{ url_for('editEpisodeData', episodeid=episode.number) }}"><i class="fas fa-pen-to-square" aria-hidden="true">&nbsp;</i>Edit Episode</a>
+                </div>
                 <p class="guests-title">Guests</p>
                 <div class="table-container">
                     <table>

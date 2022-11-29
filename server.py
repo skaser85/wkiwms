@@ -9,7 +9,7 @@ from episode import get_episodes, get_guests, get_next_episode, get_guest, inser
                     get_guests_for_episode, add_record_date, delete_guests_on_episode, delete_guest_on_episode,\
                     get_default_episode_data, add_question_to_episode, create_question, get_questions_for_episode,\
                     delete_question_from_episode, delete_questions_from_episode, add_answer_to_question, get_answers_for_question,\
-                    delete_answer_from_question, delete_answers_from_question
+                    delete_answer_from_question, delete_answers_from_question, get_episode_data
 
 app = Flask(__name__)
 CORS(app)
@@ -23,6 +23,11 @@ def index():
 def addEpisodeData():
     """ serves the addEpisodeData page"""
     return render_template('addEpisodeData.html', data=get_default_episode_data())
+
+@app.route('/editEpisodeData')
+def editEpisodeData():
+    """ servers the editEpisodeData page """
+    return render_template('editEpisodeData.html', data=get_episode_data(request.args.get('episodeid')))
 
 @app.route('/get-next-episode-number')
 def get_next_episode_number():
