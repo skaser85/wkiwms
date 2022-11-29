@@ -1,235 +1,306 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/css/index.css">
-    <title>WKIWMS - Add Episode Data</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../static/css/index.css">
+  <title>WKIWMS - Add Episode Data</title>
 </head>
+
 <body>
-    <!-- NAV -->
-    <nav class="navbar" role="navigation" aria-label="main navigation">
-        <div class="navbar-brand">
-          <a class="navbar-item" href="https://www.instagram.com/p/CdaOEptPywa/" target="_blank" rel="noopener noreferrer">
-            <img src="../static/images/WKIWMS_logo.jpeg" width="28" height="28">
-          </a>
-          <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-          </a>
-        </div>
-        <div id="navbarBasicExample" class="navbar-menu">
-          <div class="navbar-start">
-            <a class="navbar-item" href="{{ url_for('index') }}">Episodes</a>
-            <a class="navbar-item" href="{{ url_for('addEpisodeData') }}">Add Episode</a>
-            <a class="navbar-item" href="{{ url_for('editEpisodeData') }}">Edit Episode</a>
-        </div>
-    </nav>
-    <!-- tabs -->
-    <div class="tabs container is-boxed mt-4">
-        <ul>
-            <li class="is-active tab"><a>General</a></li>
-            <li class="tab"><a>Guests</a></li>
-            <li class="tab"><a>Questions</a></li>
-            <li class="tab"><a>Answers</a></li>
-        </ul>
+  <!-- NAV -->
+  <nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.instagram.com/p/CdaOEptPywa/" target="_blank" rel="noopener noreferrer">
+        <img src="../static/images/WKIWMS_logo.jpeg" width="28" height="28">
+      </a>
+      <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
     </div>
+    <div id="navbarBasicExample" class="navbar-menu">
+      <div class="navbar-start">
+        <a class="navbar-item" href="{{ url_for('index') }}">Episodes</a>
+      </div>
+  </nav>
+  <!-- tabs -->
+  <div class="tabs container is-boxed mt-4">
+    <ul>
+      <li class="is-active tab"><a>General</a></li>
+      <li class="tab"><a>Guests</a></li>
+      <li class="tab"><a>Questions</a></li>
+      <li class="tab"><a>Answers</a></li>
+    </ul>
+  </div>
 
 
 
 
-    <!-- GENERAL TAB -->
-    <div class="container" id="general-tab">
-        <div class="notification is-danger is-hidden" id="general-notif">
-            <button class="delete"></button>
-            <span></span>
-        </div>
-        <div class="field">
-          <label class="label">Episode Number</label>
-          <div class="control">
-            <input class="input" type="text" placeholder="1" id="episode-number" value="{{ data.number }}" disabled>
-          </div>
-        </div>
-        <div class="field">
-          <label class="label">Record Date</label>
-          <div class="control">
-            <input class="input" type="date" id="record-date" value="{{ data.record_date }}">
-          </div>
-        </div>
-        <div class="container">
-            <button class="button is-primary" id="update-date-btn">Update Date</button>
-        </div>
+  <!-- GENERAL TAB -->
+  <div class="container" id="general-tab">
+    <div class="notification is-danger is-hidden" id="general-notif">
+      <button class="delete"></button>
+      <span></span>
     </div>
-
-
-
-
-    <!-- GUESTS TAB -->
-    <div class="container is-hidden" id="guests-tab">
-        <div class="notification is-danger is-hidden" id="guests-notif">
-            <button class="delete"></button>
-            <span></span>
-        </div>
-        <div class="container" id="guest-row">
-          <div class="field">
-            <label class="label">Add a past guest</label>
-            <div class="control">
-              <div class="select">
-                <select id="guest-select">
-                  <option></option>
-                  {% for guest in data.guests %}
-                  <option>{{ guest.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-            <label class="label">Add a new guest</label>
-            <div class="control is-flex">
-              <input class="input" type="text" placeholder="Rusty Shackleford" id="guest-input">
-            </div>
-          </div>
-          <button class="button is-primary" id="add-guest">Add Guest to Episode</button>
-          <button class="button is-danger" id="delete-guests">Delete All Guests On Episode</button>
-        </div>
-        <table class="table">
-          <thead>
-            <tr>
-              <th></th>
-              <th>ID</th>
-              <th>Name</th>
-            </tr>
-          </thead>
-          <tbody id="guests-body">
-            {% for guest in data.guestsOnEpisode %}
-            <tr>
-              <td>
-                <span class="icon guest-trash" data-guest="{{ guest.id }}">
-                  <i class="fas fa-trash" aria-hidden="true"></i>
-                </span>
-              </td>
-              <td>{{ guest.id }}</td>
-              <td>{{ guest.name }}</td>
-            </tr>
-            <tr>
-            {% endfor %}
-          </tbody>
-        </table>
-    </div>
-
-
-
-
-    <!-- QUESTIONS TAB -->
-    <div class="container is-hidden" id="questions-tab">
-        <div class="notification is-danger is-hidden" id="questions-notif">
-            <button class="delete"></button>
-            <span></span>
-        </div>
-        <div class="field">
-          <label class="label">Question</label>
-          <div class="control">
-            <input class="input" type="text" id="question-text">
-          </div>
-        </div>
-        <div class="field">
-            <label class="label">Category</label>
-            <div class="control">
-            <div class="select">
-                <select id="category-select">
-                <option></option>
-                {% for category in data.categories %}
-                <option data-id="{{ category.id }}">{{ category.category }}</option>
-                {% endfor %}
-                </select>
-            </div>
-            </div>
-        </div>
-        <div class="field">
-            <label class="label">Contributor</label>
-            <div class="control">
-                <input class="input" type="text" id="contributor-name">
-            </div>
-        </div>
-        <div class="field">
-            <label class="label">Location</label>
-            <div class="control">
-                <input class="input" type="text" id="location-text">
-            </div>
-        </div>
-        <button class="button is-primary" id="add-question">Add Question to Episode</button>
-        <button class="button is-success" id="get-all-questions">Get Questions for Episode</button>
-        <button class="button is-danger" id="delete-all-questions">Delete All Questions for Episode</button>
-        <table class="table">
-            <thead>
-            <tr>
-                <th></th>
-                <th>ID</th>
-                <th>Question</th>
-                <th>Category</th>
-                <th>Contributor</th>
-                <th>Location</th>
-            </tr>
-            </thead>
-            <tbody id="questions-body">
-                {% for question in data.questions %}
-                <tr>
-                    <td>
-                        <span class="icon question-trash" data-question="{{ question.number }}">
-                          <i class="fas fa-trash"></i>
-                        </span>
-                    </td>
-                    <td>{{ question.number }}</td>
-                    <td>{{ question.question }}</td>
-                    <td>{{ question.category }}</td>
-                    <td>{{ question.contributor }}</td>
-                    <td>{{ question.location }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-
-
-
-    <!-- ANSWERS TAB -->
-    <div class="container is-hidden" id="answers-tab">
-        <div class="notification is-danger is-hidden" id="answers-notif">
-            <button class="delete"></button>
-            <span></span>
-        </div>
-        <h1 class="title">Answers</h1>
-    </div>
-
-
-
-
-    <!-- MODAL -->
-    <div class="modal" id="modal">
-      <div class="modal-background"></div>
-      <div class="modal-card">
-        <header class="modal-card-head">
-          <p class="modal-card-title" id="modal-title">Modal title</p>
-          <button class="delete" aria-label="close"></button>
-        </header>
-        <section class="modal-card-body" id="modal-content">
-          <!-- Content ... -->
-        </section>
-        <footer class="modal-card-foot">
-          <button class="button is-success" id="left-button"></button>
-          <button class="button" id="right-button"></button>
-        </footer>
+    <div class="field">
+      <label class="label">Episode Number</label>
+      <div class="control">
+        <input class="input" type="text" placeholder="1" id="episode-number" value="{{ data.number }}" disabled>
       </div>
     </div>
+    <div class="field">
+      <label class="label">Record Date</label>
+      <div class="control">
+        <input class="input" type="date" id="record-date" value="{{ data.record_date }}">
+      </div>
+    </div>
+    <div class="container">
+      <button class="button is-primary" id="update-date-btn">Update Date</button>
+    </div>
+  </div>
 
 
-    <script>
-        let data = {{data|tojson }};
-        console.log(data);
-    </script>
-    <script src="https://kit.fontawesome.com/5e450a7643.js" crossorigin="anonymous"></script>
-    <script src="../static/js/editEpisodeData.js"></script>
+
+
+  <!-- GUESTS TAB -->
+  <div class="container is-hidden" id="guests-tab">
+    <div class="notification is-danger is-hidden" id="guests-notif">
+      <button class="delete"></button>
+      <span></span>
+    </div>
+    <div class="container" id="guest-row">
+      <div class="field">
+        <label class="label">Add a past guest</label>
+        <div class="control">
+          <div class="select">
+            <select id="guest-select">
+              <option></option>
+              {% for guest in data.guests %}
+              <option>{{ guest.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <label class="label">Add a new guest</label>
+        <div class="control is-flex">
+          <input class="input" type="text" placeholder="Rusty Shackleford" id="guest-input">
+        </div>
+      </div>
+      <button class="button is-primary" id="add-guest">Add Guest to Episode</button>
+      <button class="button is-danger" id="delete-guests">Delete All Guests On Episode</button>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>ID</th>
+          <th>Name</th>
+        </tr>
+      </thead>
+      <tbody id="guests-body">
+        {% for guest in data.guestsOnEpisode %}
+        <tr>
+          <td>
+            <span class="icon guest-trash" data-guest="{{ guest.id }}">
+              <i class="fas fa-trash" aria-hidden="true"></i>
+            </span>
+          </td>
+          <td>{{ guest.id }}</td>
+          <td>{{ guest.name }}</td>
+        </tr>
+        <tr>
+          {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+
+
+
+  <!-- QUESTIONS TAB -->
+  <div class="container is-hidden" id="questions-tab">
+    <div class="notification is-danger is-hidden" id="questions-notif">
+      <button class="delete"></button>
+      <span></span>
+    </div>
+    <div class="field">
+      <label class="label">Question</label>
+      <div class="control">
+        <input class="input" type="text" id="question-text">
+      </div>
+    </div>
+    <div class="field">
+      <label class="label">Category</label>
+      <div class="control">
+        <div class="select">
+          <select id="category-select">
+            <option></option>
+            {% for category in data.categories %}
+            <option data-id="{{ category.id }}">{{ category.category }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label class="label">Contributor</label>
+      <div class="control">
+        <input class="input" type="text" id="contributor-name">
+      </div>
+    </div>
+    <div class="field">
+      <label class="label">Location</label>
+      <div class="control">
+        <input class="input" type="text" id="location-text">
+      </div>
+    </div>
+    <button class="button is-primary" id="add-question">Add Question to Episode</button>
+    <button class="button is-success" id="get-all-questions">Get Questions for Episode</button>
+    <button class="button is-danger" id="delete-all-questions">Delete All Questions for Episode</button>
+    <table class="table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>ID</th>
+          <th>Question</th>
+          <th>Category</th>
+          <th>Contributor</th>
+          <th>Location</th>
+        </tr>
+      </thead>
+      <tbody id="questions-body">
+        {% for question in data.questions %}
+        <tr>
+          <td>
+            <span class="icon question-trash" data-question="{{ question.number }}">
+              <i class="fas fa-trash"></i>
+            </span>
+          </td>
+          <td>{{ question.number }}</td>
+          <td>{{ question.question }}</td>
+          <td>{{ question.category }}</td>
+          <td>{{ question.contributor }}</td>
+          <td>{{ question.location }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+
+
+
+  <!-- ANSWERS TAB -->
+  <div class="container is-hidden" id="answers-tab">
+    <div class="notification is-danger is-hidden" id="answers-notif">
+      <button class="delete"></button>
+      <span></span>
+    </div>
+    <h1 class="title">Answers</h1>
+    <div class="field">
+      <label class="label">Select a Question</label>
+      <div class="control">
+        <div class="select">
+          <select id="question-select"></select>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="field">
+        <label class="label">Answer</label>
+        <div class="control">
+          <input class="input" type="text" id="answer-text">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Type</label>
+        <div class="control">
+          <div class="select">
+            <select id="type-select">
+              <option></option>
+              {% for type in data.types %}
+              <option data-id="{{ type.id }}">{{ type.type }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Guest</label>
+        <div class="control">
+          <div class="select">
+            <select id="guest-select-on-episode"></select>
+          </div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="field">
+          <label class="label">Link</label>
+          <div class="control">
+            <input class="input" type="text" id="link">
+          </div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="field">
+          <label class="label">Fun Fact</label>
+          <div class="control">
+            <input class="input" type="text" id="fun-fact">
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="button is-primary" id="add-answer">Add Answer For Question</button>
+    <button class="button is-success" id="get-all-answers">Get Answers For Question</button>
+    <button class="button is-danger" id="delete-all-answers">Delete All Answers For Question</button>
+    <table class="table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>ID</th>
+          <th>Answer</th>
+          <th>Type</th>
+          <th>Guest</th>
+          <th>Link</th>
+          <th>Fun Fact</th>
+        </tr>
+      </thead>
+      <tbody id="answers-body"></tbody>
+    </table>
+  </div>
+
+
+
+
+  <!-- MODAL -->
+  <div class="modal" id="modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title" id="modal-title">Modal title</p>
+        <button class="delete" aria-label="close"></button>
+      </header>
+      <section class="modal-card-body" id="modal-content">
+        <!-- Content ... -->
+      </section>
+      <footer class="modal-card-foot">
+        <button class="button is-success" id="left-button"></button>
+        <button class="button" id="right-button"></button>
+      </footer>
+    </div>
+  </div>
+
+
+  <script>
+        // let data = {{data|tojson }};
+        // console.log(data);
+  </script>
+  <script src="https://kit.fontawesome.com/5e450a7643.js" crossorigin="anonymous"></script>
+  <script src="../static/js/editEpisodeData.js"></script>
 </body>
+
 </html>

@@ -65,6 +65,10 @@ docTabs.forEach(t => {
 });
 
 docAddGuestBtn.addEventListener("click", async e => {
+    if (getSelectedOption(docGuestSelect).value && docGuestInput.value) {
+      activateNotification(docActiveNotif, "The dropdown and the text input cannot both contain a guest!");
+      return;
+    }
     let guestData;
     if (getSelectedOption(docGuestSelect).value) {
         guestData = await getGuest(getSelectedOption(docGuestSelect).value);
