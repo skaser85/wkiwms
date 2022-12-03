@@ -112,8 +112,7 @@
           <td>{{ guest.id }}</td>
           <td>{{ guest.name }}</td>
         </tr>
-        <tr>
-          {% endfor %}
+        {% endfor %}
       </tbody>
     </table>
   </div>
@@ -170,6 +169,7 @@
           <th>Category</th>
           <th>Contributor</th>
           <th>Location</th>
+          <th>Answers</th>
         </tr>
       </thead>
       <tbody id="questions-body">
@@ -185,6 +185,11 @@
           <td>{{ question.category }}</td>
           <td>{{ question.contributor }}</td>
           <td>{{ question.location }}</td>
+          <td>
+            <span class="icon question-arrow-to-answers" data-question="{{ question.number }}">
+              <i class="fas fa-arrow-up-right-from-square"></i>
+            </span>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
@@ -205,7 +210,12 @@
       <label class="label">Select a Question</label>
       <div class="control">
         <div class="select">
-          <select id="question-select"></select>
+          <select id="question-select">
+            <option></option>
+            {% for question in data.questions %}
+            <option data-id="{{ question.number }}">{{ question.question }}</option>
+            {% endfor %}
+          </select>
         </div>
       </div>
     </div>
@@ -269,7 +279,45 @@
           <th>Fun Fact</th>
         </tr>
       </thead>
-      <tbody id="answers-body"></tbody>
+      <tbody id="answers-body">
+        {% for answer in data.answers %}
+        <tr>
+          <td>
+            <span class="icon trash" data-id="${answer.id}">
+              <i class="fas fa-trash"></i>
+            </span>
+          </td>
+          <td>${answer.id}</td>
+          <td contenteditable="true">${answer.answer}</td>
+          <td>
+            <div class="control">
+              <div class="select">
+                <select class="type-select">
+                <option></option>
+                {% for type in data.types %}
+                <option data-id="{{ type.id }}">{{ type.type }}</option>
+                {% endfor %}
+                </select>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="control">
+              <div class="select">
+                <select class="guest-select">
+                <option></option>
+                {% for guest in data.guestsOnEpisode %}
+                <option data-id="{{ guest.id }}">{{ guest.name }}</option>
+                {% endfor %}
+                </select>
+              </div>
+            </div>
+          </td>
+          <td contenteditable="true">${answer.link}</td>
+          <td contenteditable="true">${answer.fun_fact}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
   </div>
 

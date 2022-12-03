@@ -169,6 +169,8 @@ def get_answer_type_from_id(answer_type_id: int) -> str:
     
 def get_guest_name_from_id(guest_id: int) -> str:
     """ Gets the guest name from the guest id """
+    if guest_id is None:
+        return ''
     with DBHandler(DB_PATH) as db:
         db_guest = db.fetch_one('SELECT * FROM guest WHERE id=?', (guest_id,))
         return db_guest[1]

@@ -29,9 +29,19 @@ const docQuestionsBody = document.querySelector("#questions-body");
 const docGetAllQuestions = document.querySelector("#get-all-questions");
 const docQuestionTrashIcons = document.querySelectorAll("#question-trash");
 const docDeleteQuestions = document.querySelector("#delete-all-questions");
+const docQuestionArrows = document.querySelectorAll(".question-arrow-to-answers");
 
 const docAnswersTab = document.querySelector("#answers-tab");
 const docNotifAnswers = document.querySelector("#answers-notif");
+const docQuestionsSelect = document.querySelector("#question-select");
+const docAnswersBody = document.querySelector("#answers-body");
+const docAnswerText = document.querySelector("#answer-text");
+const docAnswerTypes = document.querySelector("#type-select");
+const docAnswerGuest = document.querySelector("#guest-select-on-episode");
+const docAnswerLink = document.querySelector("#link");
+const docAnswerFunFact = document.querySelector("#fun-fact");
+const docAddAnswerBtn = document.querySelector("#add-answer");
+const docGetAnswersBtn = document.querySelector("#get-all-answers");
 
 let docActiveNotif = docNotifGeneral;
 
@@ -40,6 +50,20 @@ const docModalTitle = document.querySelector("#modal-title")
 const docModalContent = document.querySelector("#modal-content")
 const docModalLeftBtn = document.querySelector("#left-button");
 const docModalRightBtn = document.querySelector("#right-button");
+
+docQuestionsSelect.addEventListener("change", async e => {
+  if (!getSelectedOption(docQuestionsSelect))
+    return;
+  let questionSelect = getSelectedOption(docQuestionsSelect);
+  let questionID = questionSelect.dataset.id;
+  await populateAnswersTab(questionID);
+});
+
+const populateAnswersTab = async (questionID) => {
+  const answersDB = await fetch(`${SERVER_ADDR_BASE}/get-answers-for-question?questionid=${questionID}`);
+  const answers = await answersDB.json();
+  buildAnswerRows(answers.answers);
+}
 
 docDeleteGuests.addEventListener("click", async e => {
   setupModal('Delete guests', 'Are you sure you want to delete all guests from the episode?', 'Confirm', deleteAllGuests, 'Cancel', closeActiveModal);
@@ -247,6 +271,11 @@ const buildQuestionRows = (questions) => {
       <td>${question.category}</td>
       <td>${question.contributor}</td>
       <td>${question.location}</td>
+      <td>
+        <span class="icon question-arrow-to-answers" data-question="{{ question.number }}">
+          <i class="fas fa-arrow-up-right-from-square"></i>
+        </span>
+      </td>
     `;
     let q = document.createElement('tr');
     q.innerHTML = questionHTMl;
@@ -257,7 +286,97 @@ const buildQuestionRows = (questions) => {
       await deleteQuestionFromEpisode(questionID);
       row.remove();
     });
+    let arrow = q.querySelector(".question-arrow-to-answers");
+    arrow.addEventListener("click", async e => {
+      let row = arrow.parentElement.parentElement;
+      let questionID = row.children[1].innerText;
+      await populateAnswersTab(questionID);
+      
+      toggleTabContainer('questions');
+      active.classList.remove("is-active");
+      docGuestsTab.classList.toggle("is-active");
+      toggleTabContainer('guests');
+    });
     docQuestionsBody.appendChild(q);
+  }
+}
+
+const buildAnswerRows = (answers) => {
+  console.log(answers);
+  docAnswersBody.innerHTML = "";
+  for (let answer of answers) {
+    let answerHTML = `
+      <tr>
+      <td>
+        <span class="icon trash" data-id="${answer.id}">
+          <i class="fas fa-trash"></i>
+        </span>
+      </td>
+      <td>${answer.id}</td>
+      <td contenteditable="true">${answer.answer}</td>
+      <td>
+        <div class="control">
+          <div class="select">
+            <select class="type-select">
+            ${addTypeOptions(answer.type)}
+            </select>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div class="control">
+          <div class="select">
+            <select class="guest-select">
+            ${addGuestsOnEpisode(answer.guest)}
+            </select>
+          </div>
+        </div>
+      </td>
+      <td contenteditable="true">${answer.link}</td>
+      <td contenteditable="true">${answer.fun_fact}</td>
+    </tr>
+    `;
+    let a = document.createElement('tr');
+    a.innerHTML = answerHTML;
+    let trash = a.querySelector(".trash");
+    trash.addEventListener("click", async e => {
+      let row = trash.parentElement.parentElement;
+      let answerID = row.children[1].innerText;
+      await deleteAnswerFromQuestion(answerID);
+      row.remove();
+    });
+    let types = a.querySelector(".type-select");
+    let guests = a.querySelector(".guest-select");
+    setSelected(types, answer.type);
+    setSelected(guests, answer.guest);
+    docAnswersBody.appendChild(a);
+  }
+}
+
+const addTypeOptions = () => {
+  let typeOptions = "";
+  for (let type of docAnswerTypes.options) {
+    typeOptions += `<option ${type.hasAttribute("data-id") ? `data-id="${type.dataset.id}"` : ""}>${type.value}</option>`;
+  }
+  return typeOptions;
+}
+
+const addGuestsOnEpisode = () => {
+  let guestOptions = "<option></option>";
+  for (let guestRow of docGuestsBody.querySelectorAll('tr')) {
+    let guestTDs = guestRow.querySelectorAll('td');
+    let id = guestTDs[0].querySelector('span').dataset.guest;
+    let name = guestTDs[2].innerText;
+    guestOptions += `<option data-id="${id}">${name}</option>`
+  }
+  return guestOptions;
+}
+
+const setSelected = (select, selectedText) => {
+  for (let i = 0; i < select.options.length; i++) {
+    if (select.options[i].value === selectedText) {
+      select.selectedIndex = i;
+    }
   }
 }
 
@@ -271,7 +390,6 @@ docQuestionTrashIcons.forEach(t => {
 })
 
 docGuestTrashIcons.forEach(t => {
-    console.log(t);
     t.addEventListener("click", async e => {
         console.log(t);
         let row = t.parentElement.parentElement;
@@ -279,6 +397,19 @@ docGuestTrashIcons.forEach(t => {
         await deleteGuestFromEpisode(guestID);
         row.remove();
     });
+});
+
+docQuestionArrows.forEach(arrow => {
+  arrow.addEventListener("click", async e => {
+    let row = arrow.parentElement.parentElement;
+    let questionID = row.children[1].innerText;
+    await populateAnswersTab(questionID);
+    
+    toggleTabContainer('questions');
+    docQuestionsTab.classList.remove("is-active");
+    docAnswersTab.classList.toggle("is-active");
+    toggleTabContainer('answers');
+  });
 });
 
 docGetAllQuestions.addEventListener("click", async e => {
