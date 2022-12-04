@@ -62,6 +62,7 @@ docQuestionsSelect.addEventListener("change", async e => {
 const populateAnswersTab = async (questionID) => {
   const answersDB = await fetch(`${SERVER_ADDR_BASE}/get-answers-for-question?questionid=${questionID}`);
   const answers = await answersDB.json();
+  setSelectByDatasetID(docQuestionsSelect, questionID);
   buildAnswerRows(answers.answers);
 }
 
@@ -80,13 +81,24 @@ docRecordDateBtn.addEventListener("click", async e => {
 
 docTabs.forEach(t => {
     t.addEventListener("click", e => {
-        let active = document.querySelector(".tab.is-active");
-        toggleTabContainer(active.querySelector("a").innerText);
-        active.classList.remove("is-active");
-        t.classList.toggle("is-active");
-        toggleTabContainer(t.querySelector("a").innerText);
+      setActiveTab(t.querySelector("a").innerText);
     });
 });
+
+const getTabElFromTabText = (tabText) => {
+  return Array.from(docTabs).filter(t => t.querySelector("a").innerText.toLowerCase() === tabText.toLowerCase())[0];
+}
+
+const setActiveTab = (tabText) => {
+  // find the active tab and deactivate it
+  let active = document.querySelector(".tab.is-active");
+  toggleTabContainer(active.querySelector("a").innerText);
+  active.classList.remove("is-active");
+  // activate the new tab
+  let tabEl = getTabElFromTabText(tabText);
+  tabEl.classList.toggle("is-active");
+  toggleTabContainer(tabEl.querySelector("a").innerText);
+}
 
 docAddGuestBtn.addEventListener("click", async e => {
     if (getSelectedOption(docGuestSelect).value && docGuestInput.value) {
@@ -291,11 +303,7 @@ const buildQuestionRows = (questions) => {
       let row = arrow.parentElement.parentElement;
       let questionID = row.children[1].innerText;
       await populateAnswersTab(questionID);
-      
-      toggleTabContainer('questions');
-      active.classList.remove("is-active");
-      docGuestsTab.classList.toggle("is-active");
-      toggleTabContainer('guests');
+      setActiveTab('answers');
     });
     docQuestionsBody.appendChild(q);
   }
@@ -347,8 +355,8 @@ const buildAnswerRows = (answers) => {
     });
     let types = a.querySelector(".type-select");
     let guests = a.querySelector(".guest-select");
-    setSelected(types, answer.type);
-    setSelected(guests, answer.guest);
+    setSelectByText(types, answer.type);
+    setSelectByText(guests, answer.guest);
     docAnswersBody.appendChild(a);
   }
 }
@@ -372,30 +380,29 @@ const addGuestsOnEpisode = () => {
   return guestOptions;
 }
 
-const setSelected = (select, selectedText) => {
-  for (let i = 0; i < select.options.length; i++) {
-    if (select.options[i].value === selectedText) {
-      select.selectedIndex = i;
-    }
-  }
+const setSelectByText = (selectEl, selectedText) => {
+  selectEl.selectedIndex = Array.from(selectEl.options).filter(o => o.value === selectedText)[0].index;
+}
+
+const setSelectByDatasetID = (selectEl, id) => {
+  selectEl.selectedIndex = Array.from(selectEl.options).filter(o => o.dataset.id === id)[0].index;
 }
 
 docQuestionTrashIcons.forEach(t => {
     t.addEventListener("click", async e => {
-        let row = t.parentElement.parentElement;
-        let questionID = row.children[1].innerText;
-        await deleteQuestionFromEpisode(questionID);
-        row.remove();
+      let row = t.parentElement.parentElement;
+      let questionID = row.children[1].innerText;
+      await deleteQuestionFromEpisode(questionID);
+      row.remove();
     });
 })
 
 docGuestTrashIcons.forEach(t => {
     t.addEventListener("click", async e => {
-        console.log(t);
-        let row = t.parentElement.parentElement;
-        let guestID = row.children[1].innerText;
-        await deleteGuestFromEpisode(guestID);
-        row.remove();
+      let row = t.parentElement.parentElement;
+      let guestID = row.children[1].innerText;
+      await deleteGuestFromEpisode(guestID);
+      row.remove();
     });
 });
 
@@ -404,11 +411,7 @@ docQuestionArrows.forEach(arrow => {
     let row = arrow.parentElement.parentElement;
     let questionID = row.children[1].innerText;
     await populateAnswersTab(questionID);
-    
-    toggleTabContainer('questions');
-    docQuestionsTab.classList.remove("is-active");
-    docAnswersTab.classList.toggle("is-active");
-    toggleTabContainer('answers');
+    setActiveTab('answers');
   });
 });
 

@@ -243,7 +243,12 @@
         <label class="label">Guest</label>
         <div class="control">
           <div class="select">
-            <select id="guest-select-on-episode"></select>
+            <select id="guest-select-on-episode">
+              <option></option>
+              {% for guest in data.guestsOnEpisode %}
+              <option data-id="{{ guest.id }}">{{ guest.name }}</option>
+              {% endfor %}
+            </select>
           </div>
         </div>
       </div>
