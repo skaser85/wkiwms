@@ -133,4 +133,4 @@ def get_answers_for_questions_():
 # Talisman(app, content_security_policy=None)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8008, debug=True)
+    app.run(host='0.0.0.0', port=8008)
